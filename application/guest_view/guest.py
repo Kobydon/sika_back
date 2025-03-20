@@ -2014,7 +2014,7 @@ def add_session():
     new_session = Session(
         open_date=created_date,
         close_date=None,  # Use `None` instead of `""`
-        company_name=user.company_name,
+       
         open_by=usr,
         status="current"
     )
