@@ -1998,26 +1998,32 @@ def delete_gop(id):
 
 
 
-
-@guest.route("/add_session",methods=['POST'])
+@guest.route("/add_session", methods=['POST'])
 @flask_praetorian.auth_required
 def add_session():
-    user = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    user = User.query.filter_by(id=flask_praetorian.current_user().id).first()
     session_data = Session.query.filter_by(status="current").first()
-    if session:
-      session_data.status="old"
-    usr = user.firstname +" " + user.lastname
-    created_date=datetime.now().strftime('%Y-%m-%d %H:%M')
-    exp = Session(open_date=created_date,close_date="",
-                   open_by=usr,status ="current")
-  
-    db.session.add(exp)
-  
+    
+    if session_data:  # Fix: Using `session_data` instead of `session`
+        session_data.status = "old"
+    
+    usr = f"{user.firstname} {user.lastname}"
+    created_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+    # Fix: Assign `None` instead of an empty string for close_date
+    new_session = Session(
+        open_date=created_date,
+        close_date=None,  # Use `None` instead of `""`
+        company_name=user.company_name,
+        open_by=usr,
+        status="current"
+    )
+
+    db.session.add(new_session)
     db.session.commit()
     db.session.close()
-    resp = jsonify("success")
-    resp.status_code =200
-    return resp
+
+    return jsonify("success"), 200
 
 
 
