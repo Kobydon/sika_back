@@ -1474,81 +1474,115 @@ def search_refund_dates_two():
 
 @guest.route("/search_expense_dates", methods=["POST"])
 @flask_praetorian.auth_required
-def search_expense_dates():
-    try:
-        date = request.json.get("date")
 
+def search_expense_dates():
+    us = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    """
+    Searches for expense records by a specific date.
+    """
+    try:
+        # Extract the date from the JSON request body
+        date = request.json.get("date")
+        
         if not date:
             return jsonify({"error": "Date is required"}), 400
 
+        # Query the Expenses table for records containing the specified date
         expense_records = Expenses.query.filter(Expenses.date.contains(date))
+
+        # Order the results by date in descending order
         ordered_records = expense_records.order_by(desc(Expenses.date))
+
+        # Serialize the query result
         result = guest_schema.dump(ordered_records)
 
+        # Return the serialized data as a JSON response
         return jsonify(result), 200
+
     except Exception as e:
+        # Handle unexpected errors
         return jsonify({"error": str(e)}), 500
+    
+
+
 
 
 @guest.route("/search_gop_dates", methods=["POST"])
 @flask_praetorian.auth_required
 def search_gop_dates():
+    us = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    """
+    Searches for expense records by a specific date.
+    """
     try:
+        # Extract the date from the JSON request body
         date = request.json.get("date")
-
+        
         if not date:
             return jsonify({"error": "Date is required"}), 400
 
-        gop_records = GOP.query.filter(Expenses.date.contains(date))
-        ordered_records = gop_records.order_by(desc(Expenses.date))
+        # Query the Expenses table for records containing the specified date
+        gop_records = GOP.query.filter(GOP.date.contains(date))
+
+        # Order the results by date in descending order
+        ordered_records = gop_records.order_by(desc(GOP.date))
+
+        # Serialize the query result
         result = guest_schema.dump(ordered_records)
 
+        # Return the serialized data as a JSON response
         return jsonify(result), 200
+
     except Exception as e:
+        # Handle unexpected errors
         return jsonify({"error": str(e)}), 500
-@guest.route("/search_expense_budget_dates", methods=["POST"])
+
+
+
+
+@guest.route("/search_expense_budget_dates",methods=["POST"])
 @flask_praetorian.auth_required
 def search_expense_budget_dates():
-    try:
-        date = request.json.get("date")
-        if not date:
-            return jsonify({"error": "Date is required"}), 400
-        
-        pay = Budget.query.filter(Budget.term.date(date))
-        lst = pay.order_by(desc(Budget.created_date))
-        result = guest_schema.dump(lst)
-        return jsonify(result)
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    us = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    date = request.json["date"]
+    # year =request.json["year"]
+    type ="expense"
+    # print(date)
+    pay = Budget.query.filter(Budget.created_date.contains(date),Budget.type.contains(type))
+    lst = pay.order_by(desc(Budget.created_date))
+    result = guest_schema.dump(lst)
+    return jsonify(result)
 
 
-@guest.route("/search_income_budget_dates", methods=["POST"])
+
+@guest.route("/search_income_budget_dates",methods=["POST"])
 @flask_praetorian.auth_required
 def search_income_budget_dates():
-    try:
-        date = request.json.get("date")
-        if not date:
-            return jsonify({"error": "Date is required"}), 400
-        
-        pay = Budget.query.filter(Budget.date.contains(date))
-        lst = pay.order_by(desc(Budget.created_date))
-        result = guest_schema.dump(lst)
-        return jsonify(result)
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    us = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    date = request.json["date"]
+    # year =request.json["year"]
+    type ="income"
+    # print(date)
+    pay = Budget.query.filter(Budget.created_date.contains(date),Budget.type.contains(type))
+    lst = pay.order_by(desc(Budget.created_date))
+    result = guest_schema.dump(lst)
+    return jsonify(result)
+
+
+
 
 
 @guest.route("/search_expense_dates_two", methods=["POST"])
 @flask_praetorian.auth_required
 def search_expense_dates_two():
+    us = User.query.filter_by(id = flask_praetorian.current_user().id).first()
+    date = request.json.get("date")
+    date_two = request.json.get("datetwo")
+
+    # if not date or not date_two:
+    #     return jsonify({"error": "Both 'date' and 'datetwo' must be provided"}), 400
+
     try:
-        date = request.json.get("date")
-        date_two = request.json.get("datetwo")
-        if not date or not date_two:
-            return jsonify({"error": "Both 'date' and 'datetwo' must be provided"}), 400
-        
         pay = Expenses.query.filter(
             or_(
                 Expenses.date.contains(date),
@@ -1559,7 +1593,12 @@ def search_expense_dates_two():
         result = guest_schema.dump(pay)
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error occurred: {e}")
+
+
+
+
+
 
 
 @guest.route("/add_store", methods=['POST'])
