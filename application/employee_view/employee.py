@@ -138,6 +138,7 @@ def add_employee():
     except KeyError as e:
         return jsonify({"error": f"Missing key: {str(e)}"}), 400
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
