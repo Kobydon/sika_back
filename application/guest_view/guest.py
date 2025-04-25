@@ -489,7 +489,7 @@ def get_payment():
 def get_my_payment():
     try:
         user = User.query.filter_by(id=flask_praetorian.current_user().id).first()
-        name= user.first_name + ' ' + user.last_name
+        name= user.firstname + ' ' + user.lastname
         if not user:
             return jsonify({"error": "User not found"}), 404
         pay = Payment.query.filter_by(name=name).all()
